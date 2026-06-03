@@ -43,3 +43,20 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Claude Code
+.claude/
+
+# Fichiers projet IDE / éditeur
+*.iml
+arclog.iml
+
+# Fichiers de planification locaux
+PLAN.md
+
+# Tests placeholder (remplacés par les vrais tests dans test/)
+# test/widget_test.dart  ← conservé car contient le placeholder
+
+# Fichiers temporaires
+*.tmp
+*.bak
