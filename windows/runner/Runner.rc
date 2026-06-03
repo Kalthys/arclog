@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.arclog" "\0"
-            VALUE "FileDescription", "arclog" "\0"
+            VALUE "FileDescription", "Arclog" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "arclog" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.arclog. All rights reserved." "\0"
             VALUE "OriginalFilename", "arclog.exe" "\0"
-            VALUE "ProductName", "arclog" "\0"
+            VALUE "ProductName", "Arclog" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

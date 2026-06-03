@@ -45,11 +45,22 @@ static void my_application_activate(GApplication* application) {
   if (use_header_bar) {
     GtkHeaderBar* header_bar = GTK_HEADER_BAR(gtk_header_bar_new());
     gtk_widget_show(GTK_WIDGET(header_bar));
-    gtk_header_bar_set_title(header_bar, "arclog");
+    gtk_header_bar_set_title(header_bar, "Arclog");
     gtk_header_bar_set_show_close_button(header_bar, TRUE);
     gtk_window_set_titlebar(window, GTK_WIDGET(header_bar));
   } else {
-    gtk_window_set_title(window, "arclog");
+    gtk_window_set_title(window, "Arclog");
+  }
+
+  // Icône de fenêtre / barre des tâches (chemin relatif à l'exécutable)
+  {
+    gchar* icon_path = g_build_filename(
+        g_get_current_dir(), "data", "flutter_assets", "assets",
+        "Icone_Arlog_pure.jpg", nullptr);
+    GError* icon_error = nullptr;
+    gtk_window_set_icon_from_file(window, icon_path, &icon_error);
+    if (icon_error) g_error_free(icon_error);
+    g_free(icon_path);
   }
 
   gtk_window_set_default_size(window, 1280, 720);
