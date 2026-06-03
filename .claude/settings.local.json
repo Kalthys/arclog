@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir -p \\\\ *)",
+      "Bash(grep -n \"^\\\\s*},\\\\s*$\\\\|^\\\\s*\\),\\\\s*$\\\\|^\\\\s*\\);\\\\s*$\" \"/home/kalthys/Documents/Projet Vs Code/Arclog 2.0/lib/presentation/pages/game_detail_page.dart\")",
+      "Bash(flutter --version)",
+      "Bash(flutter devices *)",
+      "Bash(cp \"/home/kalthys/Documents/Projet Vs Code/Arclog 2.0/lib/main.dart\" /tmp/arclog_main.dart.bak)",
+      "Bash(cp \"/home/kalthys/Documents/Projet Vs Code/Arclog 2.0/pubspec.yaml\" /tmp/arclog_pubspec.yaml.bak)",
+      "Bash(flutter create *)",
+      "Bash(diff /tmp/arclog_main.dart.bak \"/home/kalthys/Documents/Projet Vs Code/Arclog 2.0/lib/main.dart\" && echo \"main.dart inchangé\" || echo \"main.dart modifié\")",
+      "Read(//tmp/**)",
+      "Bash(flutter pub *)",
+      "Bash(flutter build *)",
+      "Bash(flutter test *)",
+      "Bash(which flutter *)",
+      "Read(//var/home/**)",
+      "Read(//home/kalthys/**)",
+      "Read(//var/opt/**)",
+      "Bash(brew --version)",
+      "Bash(git --version)",
+      "Read(//usr/lib/**)",
+      "Bash(brew install *)",
+      "Bash(snap --version)",
+      "Bash(curl -s https://storage.googleapis.com/flutter_infra_release/releases/releases_linux.json)",
+      "Bash(mkdir -p ~/development && echo \"Dossier prêt : ~/development\")"
+    ],
+    "additionalDirectories": [
+      "/home/kalthys/Documents/Projet Vs Code/Arclog 2.0/lib/core",
+      "/home/kalthys"
+    ]
+  }
+}

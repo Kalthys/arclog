@@ -1,0 +1,31 @@
+name: arclog
+description: Gaming Journal — Electric Cyberpunk, Offline-First.
+version: 1.0.0+1
+publish_to: none
+
+environment:
+  sdk: '>=3.6.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_fonts: ^6.2.1
+  sqflite: ^2.3.3
+  sqflite_common_ffi: ^2.3.4
+  sqlite3_flutter_libs: ^0.5.0
+  path: ^1.9.0
+  flutter_riverpod: ^2.5.1
+  image_picker: ^1.1.2
+  shared_preferences: ^2.3.3
+  http: ^1.2.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^4.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - asset/Images/Logo_Arclog_transparent.png
+    - asset/Images/Icone_Arlog_pure.jpg

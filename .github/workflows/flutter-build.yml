@@ -1,0 +1,86 @@
+name: Arclog — Build Android & Windows
+
+on:
+  push:
+    branches: [ main, master ]
+  # Permet aussi de déclencher manuellement depuis l'onglet Actions
+  workflow_dispatch:
+
+jobs:
+
+  # ── Build APK Android ────────────────────────────────────────────────────────
+  build-android:
+    name: 📱 APK Android
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Configurer Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Configurer Flutter 3.44.0
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - name: Installer les dépendances
+        run: flutter pub get
+
+      - name: Accepter les licences Android SDK
+        run: yes | flutter doctor --android-licenses || true
+
+      - name: Compiler l'APK Release
+        run: flutter build apk --release
+
+      - name: Uploader l'APK comme artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arclog-Android-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+  # ── Build Windows .exe ───────────────────────────────────────────────────────
+  build-windows:
+    name: 🖥️ Exécutable Windows
+    runs-on: windows-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Configurer Flutter 3.44.0
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - name: Activer le support Windows Desktop
+        run: flutter config --enable-windows-desktop
+
+      - name: Installer les dépendances
+        run: flutter pub get
+
+      - name: Compiler l'exécutable Windows
+        run: flutter build windows --release
+
+      - name: Zipper le build Windows
+        run: |
+          Compress-Archive `
+            -Path "build\windows\x64\runner\Release\*" `
+            -DestinationPath "Arclog-Windows.zip"
+        shell: powershell
+
+      - name: Uploader le build Windows comme artefact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arclog-Windows-EXE
+          path: Arclog-Windows.zip
+          retention-days: 30
