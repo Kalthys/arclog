@@ -1,9 +1,9 @@
-name: Arclog — Build Android & Windows
+name: Arclog — Build Android, Linux & Windows
 
 on:
   push:
     branches: [ main, master ]
-  # Permet aussi de déclencher manuellement depuis l'onglet Actions
+  # Déclencher manuellement depuis l'onglet Actions GitHub
   workflow_dispatch:
 
 jobs:
@@ -39,11 +39,55 @@ jobs:
       - name: Compiler l'APK Release
         run: flutter build apk --release
 
-      - name: Uploader l'APK comme artefact
+      - name: Uploader l'APK
         uses: actions/upload-artifact@v4
         with:
           name: Arclog-Android-APK
           path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+
+  # ── Build Linux .tar.gz ──────────────────────────────────────────────────────
+  build-linux:
+    name: 🐧 Exécutable Linux
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer les dépendances système Linux
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y \
+            clang cmake ninja-build pkg-config \
+            libgtk-3-dev libblkid-dev liblzma-dev
+
+      - name: Configurer Flutter 3.44.0
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.44.0'
+          channel: stable
+          cache: true
+
+      - name: Activer le support Linux Desktop
+        run: flutter config --enable-linux-desktop
+
+      - name: Installer les dépendances
+        run: flutter pub get
+
+      - name: Compiler l'exécutable Linux
+        run: flutter build linux --release
+
+      - name: Archiver le build Linux
+        run: |
+          tar -czf Arclog-Linux.tar.gz \
+            -C build/linux/x64/release/bundle .
+
+      - name: Uploader le build Linux
+        uses: actions/upload-artifact@v4
+        with:
+          name: Arclog-Linux-Bundle
+          path: Arclog-Linux.tar.gz
           retention-days: 30
 
   # ── Build Windows .exe ───────────────────────────────────────────────────────
@@ -78,7 +122,7 @@ jobs:
             -DestinationPath "Arclog-Windows.zip"
         shell: powershell
 
-      - name: Uploader le build Windows comme artefact
+      - name: Uploader le build Windows
         uses: actions/upload-artifact@v4
         with:
           name: Arclog-Windows-EXE
