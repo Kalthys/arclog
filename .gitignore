@@ -43,6 +43,12 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/build/
+
+# CMake artefacts Linux
+linux/CMakeFiles/
+linux/CMakeCache.txt
+linux/cmake_install.cmake
 
 # Claude Code
 .claude/
