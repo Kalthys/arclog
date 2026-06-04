@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/theme/arclog_colors.dart';
@@ -178,10 +179,25 @@ class DashboardPage extends ConsumerWidget {
 // Body
 // =============================================================================
 
-class _DashboardBody extends ConsumerWidget {
+class _DashboardBody extends ConsumerStatefulWidget {
   const _DashboardBody({required this.games});
 
   final List<Game> games;
+
+  @override
+  ConsumerState<_DashboardBody> createState() => _DashboardBodyState();
+}
+
+class _DashboardBodyState extends ConsumerState<_DashboardBody> {
+  final _carouselCtrl = ScrollController();
+
+  @override
+  void dispose() {
+    _carouselCtrl.dispose();
+    super.dispose();
+  }
+
+  List<Game> get games => widget.games;
 
   List<ActivityEntry> _recentActivity() {
     final entries = <ActivityEntry>[];
@@ -223,7 +239,7 @@ class _DashboardBody extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final sort = ref.watch(carouselSortProvider);
     final totalMinutes =
         games.fold<int>(0, (sum, g) => sum + g.totalPlayTimeMinutes);
@@ -294,21 +310,37 @@ class _DashboardBody extends ConsumerWidget {
                       ),
                     ),
                   )
-                : ListView.builder(
-                    scrollDirection: Axis.horizontal,
-                    padding: const EdgeInsets.only(left: 16, right: 4),
-                    itemCount: sortedGames.length,
-                    itemBuilder: (_, i) => _GameCarouselCard(
-                      game: sortedGames[i],
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              GameDetailPage(gameId: sortedGames[i].id!),
+                : Listener(
+                    // Roue de souris → scroll horizontal (desktop/Linux)
+                    onPointerSignal: (event) {
+                      if (event is PointerScrollEvent &&
+                          _carouselCtrl.hasClients) {
+                        final offset = (_carouselCtrl.offset +
+                                event.scrollDelta.dy)
+                            .clamp(
+                          0.0,
+                          _carouselCtrl.position.maxScrollExtent,
+                        );
+                        _carouselCtrl.jumpTo(offset);
+                      }
+                    },
+                    child: ListView.builder(
+                      controller: _carouselCtrl,
+                      scrollDirection: Axis.horizontal,
+                      padding: const EdgeInsets.only(left: 16, right: 4),
+                      itemCount: sortedGames.length,
+                      itemBuilder: (_, i) => _GameCarouselCard(
+                        game: sortedGames[i],
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                GameDetailPage(gameId: sortedGames[i].id!),
+                          ),
                         ),
+                        onDelete: () =>
+                            _confirmDelete(context, ref, sortedGames[i]),
                       ),
-                      onDelete: () =>
-                          _confirmDelete(context, ref, sortedGames[i]),
                     ),
                   ),
           ),
@@ -891,6 +923,7 @@ class _SortChip extends StatelessWidget {
     );
   }
 }
+
 
 // =============================================================================
 // Section header

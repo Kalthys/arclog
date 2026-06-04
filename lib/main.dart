@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -18,6 +19,18 @@ void main() {
   );
 }
 
+/// ScrollBehavior personnalisé : active la souris (drag + roue) sur tous
+/// les scrollables de l'app, y compris les listes horizontales.
+class _ArclogScrollBehavior extends MaterialScrollBehavior {
+  @override
+  Set<PointerDeviceKind> get dragDevices => {
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.unknown,
+      };
+}
+
 class ArclogApp extends StatelessWidget {
   const ArclogApp({super.key});
 
@@ -26,6 +39,7 @@ class ArclogApp extends StatelessWidget {
     return MaterialApp(
       title: 'ARCLOG',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: _ArclogScrollBehavior(),
       theme: ArclogTheme.dark.copyWith(
         textTheme: GoogleFonts.orbitronTextTheme(ArclogTheme.dark.textTheme),
       ),
