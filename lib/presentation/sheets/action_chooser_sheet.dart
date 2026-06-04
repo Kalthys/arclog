@@ -9,12 +9,14 @@ class ActionChooserSheet extends StatelessWidget {
     required this.onQuickSession,
     required this.onChrono,
     required this.onDeleteGames,
+    required this.onImportSteam,
   });
 
   final VoidCallback onAddGame;
   final VoidCallback onQuickSession;
   final VoidCallback onChrono;
   final VoidCallback onDeleteGames;
+  final VoidCallback onImportSteam;
 
   @override
   Widget build(BuildContext context) {
@@ -47,6 +49,14 @@ class ActionChooserSheet extends StatelessWidget {
             sublabel: 'Lancer un timer en direct',
             color: ArclogColors.success,
             onTap: onChrono,
+          ),
+          const SizedBox(height: 10),
+          _ActionButton(
+            icon: Icons.sports_esports,
+            label: 'IMPORTER DEPUIS STEAM',
+            sublabel: 'Ajouter des jeux de ta bibliothèque Steam',
+            color: ArclogColors.electricYellow,
+            onTap: onImportSteam,
           ),
           const SizedBox(height: 10),
           _ActionButton(

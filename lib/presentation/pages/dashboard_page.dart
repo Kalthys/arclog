@@ -119,6 +119,19 @@ class DashboardPage extends ConsumerWidget {
           Navigator.pop(context);
           _openDeletePicker(context, ref);
         },
+        onImportSteam: () {
+          Navigator.pop(context);
+          showModalBottomSheet(
+            context: context,
+            isScrollControlled: true,
+            backgroundColor: ArclogColors.surfaceDark,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+              side: BorderSide(color: ArclogColors.circuitLine),
+            ),
+            builder: (_) => const SteamSettingsSheet(),
+          );
+        },
       ),
     );
   }
