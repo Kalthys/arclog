@@ -18,6 +18,7 @@ import '../widgets/neon_card.dart';
 import '../sheets/action_chooser_sheet.dart';
 import '../sheets/add_game_sheet.dart';
 import '../sheets/game_delete_picker_sheet.dart';
+import '../sheets/steam_game_picker_sheet.dart';
 import '../sheets/steam_settings_sheet.dart';
 import '../sheets/chrono_start_sheet.dart';
 import '../sheets/chrono_stop_sheet.dart';
@@ -123,19 +124,29 @@ class DashboardPage extends ConsumerWidget {
         },
         onImportSteam: () {
           Navigator.pop(context);
-          showModalBottomSheet(
-            context: context,
-            isScrollControlled: true,
-            backgroundColor: ArclogColors.surfaceDark,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-              side: BorderSide(color: ArclogColors.circuitLine),
-            ),
-            builder: (_) => const SteamSettingsSheet(),
-          );
+          _fetchAndOpenPicker(context, ref);
         },
       ),
     );
+  }
+
+  Future<void> _fetchAndOpenPicker(
+      BuildContext context, WidgetRef ref) async {
+    // Réinitialise l'état et charge la liste Steam directement
+    ref.read(steamSyncProvider.notifier).reset();
+    await ref.read(steamSyncProvider.notifier).fetchGames();
+
+    if (!context.mounted) return;
+    final games = ref.read(steamSyncProvider).availableGames;
+    if (games.isEmpty) return;
+
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (_) => SteamGamePickerSheet(games: games),
+    );
+    ref.read(steamSyncProvider.notifier).clearGames();
   }
 
   void _openDeletePicker(BuildContext context, WidgetRef ref) {
@@ -521,7 +532,7 @@ class _SteamSyncButton extends ConsumerWidget {
         // ── Choisir / importer des jeux ──────────────────────────────────
         Expanded(
           child: _SteamChip(
-            label: 'IMPORTER LES JEUX',
+            label: 'GÉRER LE COMPTE STEAM',
             icon: Icons.add_circle_outline,
             color: ArclogColors.cyanGlow,
             borderColor: ArclogColors.cyanGlow.withValues(alpha: 0.4),
