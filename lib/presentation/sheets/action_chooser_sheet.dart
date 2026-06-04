@@ -10,6 +10,7 @@ class ActionChooserSheet extends StatelessWidget {
     required this.onChrono,
     required this.onDeleteGames,
     required this.onImportSteam,
+    this.steamConnected = false,
   });
 
   final VoidCallback onAddGame;
@@ -17,6 +18,8 @@ class ActionChooserSheet extends StatelessWidget {
   final VoidCallback onChrono;
   final VoidCallback onDeleteGames;
   final VoidCallback onImportSteam;
+  /// Affiche le bouton Steam seulement si connecté
+  final bool steamConnected;
 
   @override
   Widget build(BuildContext context) {
@@ -27,10 +30,21 @@ class ActionChooserSheet extends StatelessWidget {
         children: [
           const SheetHandle(),
           const SizedBox(height: 20),
+          // Steam en premier — visible seulement si connecté
+          if (steamConnected) ...[
+            _ActionButton(
+              icon: Icons.sports_esports,
+              label: 'IMPORTER DEPUIS STEAM',
+              sublabel: 'Ajouter des jeux de ta bibliothèque Steam',
+              color: ArclogColors.cyanGlow,
+              onTap: onImportSteam,
+            ),
+            const SizedBox(height: 10),
+          ],
           _ActionButton(
             icon: Icons.videogame_asset_outlined,
             label: 'AJOUTER UN JEU',
-            sublabel: 'Créer une nouvelle fiche de jeu',
+            sublabel: 'Créer une nouvelle fiche manuellement',
             color: ArclogColors.cyanGlow,
             onTap: onAddGame,
           ),
@@ -49,14 +63,6 @@ class ActionChooserSheet extends StatelessWidget {
             sublabel: 'Lancer un timer en direct',
             color: ArclogColors.success,
             onTap: onChrono,
-          ),
-          const SizedBox(height: 10),
-          _ActionButton(
-            icon: Icons.sports_esports,
-            label: 'IMPORTER DEPUIS STEAM',
-            sublabel: 'Ajouter des jeux de ta bibliothèque Steam',
-            color: ArclogColors.electricYellow,
-            onTap: onImportSteam,
           ),
           const SizedBox(height: 10),
           _ActionButton(

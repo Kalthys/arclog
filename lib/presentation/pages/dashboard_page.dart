@@ -95,6 +95,7 @@ class DashboardPage extends ConsumerWidget {
   }
 
   void _showActionChooser(BuildContext context, WidgetRef ref) {
+    final steamId = ref.read(steamIdProvider).valueOrNull ?? '';
     showModalBottomSheet(
       context: context,
       backgroundColor: ArclogColors.surfaceDark,
@@ -103,6 +104,7 @@ class DashboardPage extends ConsumerWidget {
         side: BorderSide(color: ArclogColors.circuitLine),
       ),
       builder: (_) => ActionChooserSheet(
+        steamConnected: steamId.isNotEmpty,
         onAddGame: () {
           Navigator.pop(context);
           _openSheet(context, const AddGameSheet());
