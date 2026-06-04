@@ -105,7 +105,7 @@ class _SteamGamePickerSheetState
                           color: ArclogColors.cyanGlow, size: 20),
                       const SizedBox(width: 10),
                       Expanded(
-                        child: Text('CHOISIR LES JEUX STEAM',
+                        child: Text('IMPORTER DES JEUX STEAM',
                             style: tt.titleLarge),
                       ),
                       Text(

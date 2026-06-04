@@ -465,7 +465,7 @@ class _SteamSettingsSheetState extends ConsumerState<SteamSettingsSheet> {
                 syncState.isLoadingGames
                     ? 'CHARGEMENT…'
                     : isConnected
-                        ? 'AJOUTER DES JEUX STEAM'
+                        ? 'IMPORTER DES JEUX STEAM'
                         : 'SE CONNECTER À STEAM',
                 style: const TextStyle(
                   fontFamily: 'Orbitron',
