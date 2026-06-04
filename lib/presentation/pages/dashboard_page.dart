@@ -532,7 +532,7 @@ class _SteamSyncButton extends ConsumerWidget {
         // ── Choisir / importer des jeux ──────────────────────────────────
         Expanded(
           child: _SteamChip(
-            label: 'GÉRER LE COMPTE STEAM',
+            label: 'MON COMPTE STEAM',
             icon: Icons.add_circle_outline,
             color: ArclogColors.cyanGlow,
             borderColor: ArclogColors.cyanGlow.withValues(alpha: 0.4),
