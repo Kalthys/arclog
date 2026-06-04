@@ -14,6 +14,41 @@ class SteamSettingsSheet extends ConsumerStatefulWidget {
       _SteamSettingsSheetState();
 }
 
+class _HelpSection extends StatelessWidget {
+  const _HelpSection({required this.title, required this.body});
+  final String title;
+  final String body;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontFamily: 'Orbitron',
+            fontSize: 10,
+            fontWeight: FontWeight.w700,
+            color: ArclogColors.electricYellow,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 5),
+        Text(
+          body,
+          style: const TextStyle(
+            fontFamily: 'Orbitron',
+            fontSize: 10,
+            color: ArclogColors.textPrimary,
+            height: 1.6,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _ResultRow extends StatelessWidget {
   const _ResultRow(
       {required this.icon, required this.label, required this.color});
@@ -38,14 +73,12 @@ class _ResultRow extends StatelessWidget {
       );
 }
 
-class _SteamSettingsSheetState
-    extends ConsumerState<SteamSettingsSheet> {
+class _SteamSettingsSheetState extends ConsumerState<SteamSettingsSheet> {
   late final TextEditingController _steamIdCtrl;
 
   @override
   void initState() {
     super.initState();
-    // Valeurs en cache (peuvent être vides si les providers chargent encore)
     _steamIdCtrl = TextEditingController(
       text: ref.read(steamIdProvider).valueOrNull ?? '',
     );
@@ -76,7 +109,6 @@ class _SteamSettingsSheetState
     ref.read(steamSyncProvider.notifier).reset();
     await ref.read(steamSyncProvider.notifier).fetchGames();
 
-    // Ouvre le picker si des jeux ont été récupérés
     if (!mounted) return;
     final games = ref.read(steamSyncProvider).availableGames;
     if (games.isEmpty) return;
@@ -88,20 +120,133 @@ class _SteamSettingsSheetState
       builder: (_) => SteamGamePickerSheet(games: games),
     );
 
-    // Après fermeture du picker, vider la liste
     if (mounted) ref.read(steamSyncProvider.notifier).clearGames();
+  }
+
+  // ── Aide ─────────────────────────────────────────────────────────────────
+
+  void _showHelp() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: ArclogColors.surfaceDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(14),
+          side: const BorderSide(color: ArclogColors.cyanGlow, width: 1.2),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.help_outline,
+                color: ArclogColors.cyanGlow, size: 18),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text(
+                'Comment lier votre compte Steam ?',
+                style: TextStyle(
+                  fontFamily: 'Orbitron',
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: ArclogColors.cyanGlow,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
+          ],
+        ),
+        content: const SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _HelpSection(
+                title: '🔑  Votre ID',
+                body: 'Entrez votre SteamID classique (17 chiffres) OU votre nom d\'URL personnalisée.',
+              ),
+              SizedBox(height: 14),
+              _HelpSection(
+                title: '📍  Où le trouver ?',
+                body: 'Dans Steam, allez dans Détails du compte (pour l\'ID) ou sur votre page de profil (pour voir votre URL personnalisée).',
+              ),
+              SizedBox(height: 14),
+              _HelpSection(
+                title: '🔓  Visibilité',
+                body: 'Dans Modifier le profil > Paramètres de confidentialité, assurez-vous que Mon profil et Détails des jeux sont sur « Public » pour qu\'Arclog puisse récupérer vos données.',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('COMPRIS',
+                style: TextStyle(
+                  fontFamily: 'Orbitron',
+                  fontWeight: FontWeight.w700,
+                  color: ArclogColors.cyanGlow,
+                )),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ── Déconnexion Steam ──────────────────────────────────────────────────────
+
+  Future<void> _disconnect() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (_) => AlertDialog(
+        backgroundColor: ArclogColors.surfaceDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+          side: const BorderSide(color: ArclogColors.circuitLine),
+        ),
+        title: const Text('Se déconnecter de Steam ?',
+            style: TextStyle(
+                fontFamily: 'Orbitron',
+                fontSize: 13,
+                color: ArclogColors.textPrimary)),
+        content: const Text(
+          'Ton Steam ID et ton avatar seront effacés. '
+          'Les jeux importés restent dans ta bibliothèque.',
+          style: TextStyle(
+              fontFamily: 'Orbitron',
+              fontSize: 11,
+              color: ArclogColors.textSecondary,
+              height: 1.5),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('ANNULER',
+                style: TextStyle(color: ArclogColors.textSecondary)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('DÉCONNECTER',
+                style: TextStyle(color: ArclogColors.error)),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    await ref.read(steamIdProvider.notifier).setId('');
+    await ref.read(steamAvatarProvider.notifier).setUrl('');
+    ref.read(steamSyncProvider.notifier).reset();
+    setState(() => _steamIdCtrl.clear());
+    if (mounted) Navigator.pop(context);
   }
 
   @override
   Widget build(BuildContext context) {
     final syncState = ref.watch(steamSyncProvider);
+    final steamId  = ref.watch(steamIdProvider).valueOrNull ?? '';
     final tt = Theme.of(context).textTheme;
+    final isConnected = steamId.isNotEmpty;
 
     return Padding(
       padding: EdgeInsets.only(
-        left: 24,
-        right: 24,
-        top: 28,
+        left: 24, right: 24, top: 28,
         bottom: MediaQuery.of(context).viewInsets.bottom + 28,
       ),
       child: Column(
@@ -110,11 +255,12 @@ class _SteamSettingsSheetState
         children: [
           const SheetHandle(),
           const SizedBox(height: 20),
+
+          // ── Header ────────────────────────────────────────────────────────
           Row(
             children: [
               Container(
-                width: 36,
-                height: 36,
+                width: 36, height: 36,
                 decoration: BoxDecoration(
                   color: ArclogColors.cyanGlow.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(8),
@@ -125,24 +271,75 @@ class _SteamSettingsSheetState
                     color: ArclogColors.cyanGlow, size: 20),
               ),
               const SizedBox(width: 12),
-              Text('SYNCHRONISATION STEAM', style: tt.titleLarge),
+              Expanded(
+                child: Text('SYNCHRONISATION STEAM', style: tt.titleLarge),
+              ),
+              // Bouton déconnexion (visible si déjà connecté)
+              if (isConnected)
+                TextButton.icon(
+                  onPressed: syncState.isLoading ? null : _disconnect,
+                  style: TextButton.styleFrom(
+                    foregroundColor: ArclogColors.error,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10, vertical: 6),
+                  ),
+                  icon: const Icon(Icons.logout, size: 14),
+                  label: const Text('DÉCO',
+                      style: TextStyle(
+                          fontFamily: 'Orbitron',
+                          fontSize: 9,
+                          fontWeight: FontWeight.w700)),
+                ),
             ],
           ),
           const SizedBox(height: 20),
 
           // ── Steam ID ──────────────────────────────────────────────────────
+          Row(
+            children: [
+              const Text('Steam ID ou pseudo',
+                  style: TextStyle(
+                      fontFamily: 'Orbitron',
+                      fontSize: 10,
+                      color: ArclogColors.electricYellow,
+                      letterSpacing: 2)),
+              const Spacer(),
+              GestureDetector(
+                onTap: _showHelp,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: ArclogColors.cyanGlow.withValues(alpha: 0.10),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                        color: ArclogColors.cyanGlow.withValues(alpha: 0.45)),
+                  ),
+                  child: const Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(Icons.help_outline,
+                          size: 12, color: ArclogColors.cyanGlow),
+                      SizedBox(width: 5),
+                      Text('COMMENT FAIRE ?',
+                          style: TextStyle(
+                            fontFamily: 'Orbitron',
+                            fontSize: 8,
+                            fontWeight: FontWeight.w700,
+                            color: ArclogColors.cyanGlow,
+                            letterSpacing: 0.5,
+                          )),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
           SheetField(
             ctrl: _steamIdCtrl,
-            label: 'Steam ID ou pseudo',
+            label: '',
             hint: 'monpseudo  ou  76561198XXXXXXXXX',
-          ),
-          const SizedBox(height: 4),
-          const Text(
-            'Pseudo Steam ou SteamID64 (steamid.io) — profil Steam doit être Public',
-            style: TextStyle(
-                fontFamily: 'Orbitron',
-                fontSize: 9,
-                color: ArclogColors.textSecondary),
           ),
           const SizedBox(height: 20),
 
@@ -240,56 +437,44 @@ class _SteamSettingsSheetState
             const SizedBox(height: 12),
           ],
 
-          // ── Boutons ───────────────────────────────────────────────────────
-          Row(
-            children: [
-              Expanded(
-                child: OutlinedButton(
-                  onPressed: syncState.isLoading ? null : _saveSettings,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: ArclogColors.circuitLine),
-                    foregroundColor: ArclogColors.textSecondary,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  child: const Text('ENREGISTRER',
-                      style:
-                          TextStyle(fontFamily: 'Orbitron', fontSize: 10)),
+          // ── Bouton principal — plus visible ───────────────────────────────
+          SizedBox(
+            width: double.infinity,
+            height: 50,
+            child: ElevatedButton.icon(
+              onPressed: syncState.isLoading ? null : _fetchAndPick,
+              style: ElevatedButton.styleFrom(
+                // Jaune électrique pour ressortir sur le fond sombre
+                backgroundColor: ArclogColors.electricYellow,
+                foregroundColor: ArclogColors.deepBlack,
+                padding: const EdgeInsets.symmetric(vertical: 12),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8)),
+                elevation: 4,
+                shadowColor:
+                    ArclogColors.electricYellow.withValues(alpha: 0.5),
+              ),
+              icon: syncState.isLoadingGames
+                  ? const SizedBox(
+                      width: 16, height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: ArclogColors.deepBlack))
+                  : const Icon(Icons.sports_esports, size: 20),
+              label: Text(
+                syncState.isLoadingGames
+                    ? 'CHARGEMENT…'
+                    : isConnected
+                        ? 'AJOUTER DES JEUX STEAM'
+                        : 'SE CONNECTER À STEAM',
+                style: const TextStyle(
+                  fontFamily: 'Orbitron',
+                  fontSize: 12,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: 1,
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 2,
-                child: ElevatedButton.icon(
-                  onPressed: syncState.isLoading ? null : _fetchAndPick,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: ArclogColors.cyanGlow,
-                    foregroundColor: ArclogColors.deepBlack,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
-                  ),
-                  icon: syncState.isLoadingGames
-                      ? const SizedBox(
-                          width: 14,
-                          height: 14,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: ArclogColors.deepBlack))
-                      : const Icon(Icons.sports_esports, size: 16),
-                  label: Text(
-                    syncState.isLoadingGames
-                        ? 'CHARGEMENT…'
-                        : 'CHOISIR LES JEUX',
-                    style: const TextStyle(
-                        fontFamily: 'Orbitron',
-                        fontSize: 10,
-                        fontWeight: FontWeight.w700),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ],
       ),

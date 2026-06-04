@@ -66,3 +66,5 @@ PLAN.md
 # Fichiers temporaires
 *.tmp
 *.bak
+asset/Images/Logo_Arclog.png
+.metadata

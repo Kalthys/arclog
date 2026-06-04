@@ -491,10 +491,10 @@ class _SteamSyncButton extends ConsumerWidget {
 
     if (!isConfigured) {
       return _SteamChip(
-        label: 'CONFIGURER STEAM',
+        label: 'SE CONNECTER À STEAM',
         icon: Icons.sports_esports,
-        color: ArclogColors.textSecondary,
-        borderColor: ArclogColors.circuitLine,
+        color: ArclogColors.electricYellow,
+        borderColor: ArclogColors.electricYellow.withValues(alpha: 0.6),
         onTap: onSettingsTap,
       );
     }
